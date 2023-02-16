@@ -1,7 +1,7 @@
 use super::tetromino::Tetromino;
 
-const PLAYFIELD_ROWS: usize = 20;
-const PLAYFIELD_COLUMNS: usize = 10;
+pub(super) const PLAYFIELD_ROWS: usize = 20;
+pub(super) const PLAYFIELD_COLUMNS: usize = 10;
 
 pub(super) struct Matrix {
     pub(super) cells: [[Cell; PLAYFIELD_COLUMNS]; PLAYFIELD_ROWS],

@@ -8,10 +8,16 @@ use std::{
     time::{Duration, Instant},
 };
 
+use crossterm_input::{input, InputEvent, KeyEvent, RawScreen, SyncReader};
+use crossterm_terminal::{ClearType, Terminal};
+
 use matrix::{Cell, Matrix};
 use next_queue::NextQueue;
 
-use self::tetromino::{Rotation, Tetromino};
+use self::{
+    matrix::{PLAYFIELD_COLUMNS, PLAYFIELD_ROWS},
+    tetromino::{Rotation, Tetromino},
+};
 
 pub(super) struct Tetris {
     matrix: Matrix,
@@ -34,27 +40,61 @@ impl Tetris {
         let mut total_time: Duration = Duration::ZERO;
         let mut previous_time = Instant::now();
 
-        self.falling_tetromino = self.falling_tetromino.rotate(Rotation::Clockwise);
+        let mut terminal = Terminal::new();
 
-        for _ in 0..5 {
+        let _raw = RawScreen::into_raw_mode();
+        let input = input();
+
+        let mut reader = input.read_sync();
+
+        let (columns, rows) = terminal.size().unwrap(); // Safe because this shouldn't fail
+
+        terminal
+            .set_size(PLAYFIELD_COLUMNS as u16, PLAYFIELD_ROWS as u16)
+            .unwrap(); // Safe because this shouldn't fail.
+
+        loop {
             let current_time = Instant::now();
             let delta_time = current_time.duration_since(previous_time);
 
             previous_time = current_time;
 
-            self.update(total_time, delta_time);
+            let GameMessage::Continue = self.update(total_time, delta_time, &mut reader) else {
+                break;
+            };
 
             total_time += delta_time;
 
-            self.render();
+            self.render(&mut terminal);
         }
+
+        terminal.set_size(columns, rows).unwrap(); // Safe because this shouldn't fail.
     }
 
-    fn update(&mut self, total_time: Duration, delta_time: Duration) {
-        self.falling_tetromino = self.falling_tetromino.rotate(Rotation::Counterclockwise);
+    fn update(&mut self, total_time: Duration, delta_time: Duration, reader: &mut SyncReader) -> GameMessage {
+        if let Some(event) = reader.next() {
+            match event {
+                InputEvent::Keyboard(event) => match event {
+                    KeyEvent::Right => {
+                        self.falling_tetromino = self.falling_tetromino.rotate(Rotation::Clockwise);
+                    }
+                    KeyEvent::Left => {
+                        self.falling_tetromino = self.falling_tetromino.rotate(Rotation::Counterclockwise);
+                    }
+                    KeyEvent::Esc => return GameMessage::Quit,
+                    _ => {}
+                },
+                _ => {}
+            }
+        }
+
+        GameMessage::Continue
     }
-    fn render(&self) {
-        println!("{}\n", self);
+
+    fn render(&self, terminal: &mut Terminal) {
+        // There's no reason why these two functions should fail, so I think it's safe to unwrap them.
+        terminal.clear(ClearType::All).unwrap();
+        terminal.write(self).unwrap();
     }
 }
 
@@ -78,6 +118,12 @@ impl Display for Tetris {
             .collect::<Vec<String>>()
             .join("\n");
 
-        write!(f, "{}: {:?}", stringified, self.next_queue.current())
+        write!(f, "{}", stringified)
     }
+}
+
+#[derive(PartialEq, Eq)]
+enum GameMessage {
+    Continue,
+    Quit,
 }
