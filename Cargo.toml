@@ -6,3 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+windows = { version = "0.44.0", features = ["Win32_System_Console", "Win32_Foundation", "Win32_Security"] }
+strum = { version = "0.24.1", features = ["derive"] }
+rand = "0.8.5"

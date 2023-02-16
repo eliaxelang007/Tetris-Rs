@@ -1,3 +1,8 @@
+#![allow(dead_code, unused_variables, unused_assignments)]
+mod tetris;
+use tetris::Tetris;
+
 fn main() {
-    println!("Hello, world!");
+    let mut game = Tetris::new();
+    game.start();
 }
