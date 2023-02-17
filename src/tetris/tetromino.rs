@@ -1,6 +1,7 @@
 use super::util::HandyF32;
 use strum::{EnumCount, EnumIter};
 
+#[derive(Copy, Clone)]
 pub(super) struct Tetromino {
     pub center: Position,
     pub minos: [Mino; 4],
@@ -14,10 +15,12 @@ impl Tetromino {
         }
     }
 
-    pub(super) fn to_position(&self) -> [Position; 4] {
-        self.minos.map(|mino| Position {
-            row: self.center.row + mino.y_to_center,
-            column: self.center.column + mino.x_to_center,
+    pub(super) fn to_position(&self) -> [(i32, i32); 4] {
+        self.minos.map(|mino| {
+            (
+                (self.center.row + mino.y_to_center).round() as i32,
+                (self.center.column + mino.x_to_center).round() as i32,
+            )
         })
     }
 }

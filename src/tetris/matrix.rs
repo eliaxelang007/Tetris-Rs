@@ -1,4 +1,4 @@
-use super::tetromino::Tetromino;
+use super::tetromino::{Position, Tetromino};
 
 pub(super) const PLAYFIELD_ROWS: usize = 20;
 pub(super) const PLAYFIELD_COLUMNS: usize = 10;
@@ -18,14 +18,31 @@ impl Matrix {
         let mut copy = self.cells.clone();
 
         for position in tetromino.to_position() {
-            copy[position.row as usize][position.column as usize] = Cell::Filled;
+            copy[position.0 as usize][position.1 as usize] = Cell::Filled;
         }
 
         Matrix { cells: copy }
     }
+
+    pub(super) fn validate(&self, tetromino: &Tetromino) -> TetrominoState {
+        match tetromino.to_position().iter().all(|(row, column)| {
+            (0..(PLAYFIELD_ROWS as i32)).contains(&row)
+                && (0..(PLAYFIELD_COLUMNS as i32)).contains(&column)
+                && self.cells[*row as usize][*column as usize] != Cell::Filled
+        }) {
+            true => TetrominoState::Valid,
+            false => TetrominoState::Invalid,
+        }
+    }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Eq, PartialEq)]
+pub(super) enum TetrominoState {
+    Valid,
+    Invalid,
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub(super) enum Cell {
     Filled,
     Empty,

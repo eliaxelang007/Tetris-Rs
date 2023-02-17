@@ -8,16 +8,15 @@ use std::{
     time::{Duration, Instant},
 };
 
-use crossterm_input::{input, InputEvent, KeyEvent, RawScreen, SyncReader};
+use crossterm_input::{input, AsyncReader, InputEvent, KeyEvent, RawScreen};
 use crossterm_terminal::{ClearType, Terminal};
 
 use matrix::{Cell, Matrix};
 use next_queue::NextQueue;
 
-use self::{
-    matrix::{PLAYFIELD_COLUMNS, PLAYFIELD_ROWS},
-    tetromino::{Rotation, Tetromino},
-};
+use crate::tetris::matrix::TetrominoState;
+
+use self::tetromino::{Rotation, Tetromino};
 
 pub(super) struct Tetris {
     matrix: Matrix,
@@ -45,13 +44,13 @@ impl Tetris {
         let _raw = RawScreen::into_raw_mode();
         let input = input();
 
-        let mut reader = input.read_sync();
+        let mut reader = input.read_async();
 
         let (columns, rows) = terminal.size().unwrap(); // Safe because this shouldn't fail
 
-        terminal
-            .set_size(PLAYFIELD_COLUMNS as u16, PLAYFIELD_ROWS as u16)
-            .unwrap(); // Safe because this shouldn't fail.
+        // terminal
+        //     .set_size(PLAYFIELD_COLUMNS as u16, PLAYFIELD_ROWS as u16)
+        //     .unwrap(); // Safe because this shouldn't fail.
 
         loop {
             let current_time = Instant::now();
@@ -71,21 +70,38 @@ impl Tetris {
         terminal.set_size(columns, rows).unwrap(); // Safe because this shouldn't fail.
     }
 
-    fn update(&mut self, total_time: Duration, delta_time: Duration, reader: &mut SyncReader) -> GameMessage {
+    fn update(&mut self, total_time: Duration, delta_time: Duration, reader: &mut AsyncReader) -> GameMessage {
+        let mut next_tetromino = self.falling_tetromino;
+
         if let Some(event) = reader.next() {
             match event {
                 InputEvent::Keyboard(event) => match event {
-                    KeyEvent::Right => {
-                        self.falling_tetromino = self.falling_tetromino.rotate(Rotation::Clockwise);
+                    KeyEvent::Up => {
+                        next_tetromino = next_tetromino.rotate(Rotation::Clockwise);
                     }
-                    KeyEvent::Left => {
-                        self.falling_tetromino = self.falling_tetromino.rotate(Rotation::Counterclockwise);
+                    KeyEvent::Ctrl(_) => {
+                        next_tetromino = next_tetromino.rotate(Rotation::Counterclockwise);
                     }
                     KeyEvent::Esc => return GameMessage::Quit,
                     _ => {}
                 },
                 _ => {}
             }
+        }
+
+        if self.matrix.validate(&next_tetromino) == TetrominoState::Invalid {
+            next_tetromino = self.falling_tetromino;
+        }
+
+        const CELL_FALL_PER_FRAME: f32 = 3.0;
+
+        next_tetromino.center.row -= CELL_FALL_PER_FRAME * delta_time.as_secs_f32();
+
+        if self.matrix.validate(&next_tetromino) == TetrominoState::Invalid {
+            self.matrix = self.matrix.solidify(self.falling_tetromino);
+            self.falling_tetromino = self.next_queue.next().unwrap().new();
+        } else {
+            self.falling_tetromino = next_tetromino;
         }
 
         GameMessage::Continue
@@ -108,7 +124,7 @@ impl Display for Tetris {
         });
 
         for mino_position in self.falling_tetromino.to_position() {
-            characterized[mino_position.row as usize][mino_position.column as usize] = '▓';
+            characterized[mino_position.0 as usize][mino_position.1 as usize] = '▓';
         }
 
         let stringified = characterized
