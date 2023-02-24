@@ -1,8 +1,10 @@
-#![allow(dead_code, unused_variables, unused_assignments)]
+#![allow(dead_code)]
+
 mod tetris;
-use tetris::Tetris;
+
+use tetris::{Human, Tetris};
 
 fn main() {
-    let mut game = Tetris::new();
-    game.start();
+    let tetris = Tetris::new();
+    tetris.start::<Human>();
 }
