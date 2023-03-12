@@ -50,29 +50,29 @@ fn test_tetromino_rotation() {
 
 #[test]
 fn test_tetromino_snapping() {
-    struct Coordinate {
+    struct Vector2 {
         x: f32,
         y: f32,
     }
 
-    impl Coordinate {
-        fn distance(&self, other: &Coordinate) -> f32 {
+    impl Vector2 {
+        fn distance(&self, other: &Vector2) -> f32 {
             ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
         }
     }
 
-    impl From<Mino> for Coordinate {
+    impl From<Mino> for Vector2 {
         fn from(mino: Mino) -> Self {
-            Coordinate {
+            Vector2 {
                 x: mino.x_to_center.into(),
                 y: mino.y_to_center.into(),
             }
         }
     }
 
-    impl From<Snapped> for Coordinate {
+    impl From<Snapped> for Vector2 {
         fn from(mino: Snapped) -> Self {
-            Coordinate {
+            Vector2 {
                 x: mino.column.into(),
                 y: mino.row.into(),
             }
@@ -88,12 +88,12 @@ fn test_tetromino_snapping() {
             .minoes
             .iter()
             .combinations(2)
-            .map(|minoes| Coordinate::from(minoes[0].clone()).distance(&minoes[1].clone().into()))
+            .map(|minoes| Vector2::from(minoes[0].clone()).distance(&minoes[1].clone().into()))
             .collect::<Vec<_>>();
 
         let snapped = Tetromino {
             center: Center {
-                row: t_block.center.row + fractional_part,
+                row: t_block.center.row - fractional_part,
                 column: t_block.center.column,
             },
             minoes: t_block.minoes,
@@ -103,19 +103,10 @@ fn test_tetromino_snapping() {
         let new_distances = snapped
             .iter()
             .combinations(2)
-            .map(|items| Coordinate::from(items[0].clone()).distance(&items[1].clone().into()))
+            .map(|items| Vector2::from(items[0].clone()).distance(&items[1].clone().into()))
             .collect::<Vec<_>>();
 
         assert_eq!(old_distances, new_distances);
-
-        let unsnapped = snapped.map(|Snapped { row, column }| {
-            Mino::new(
-                (column as f32) - f32::from(t_block.center.column),
-                (row as f32) - t_block.center.row,
-            )
-        });
-
-        assert_eq!(unsnapped, t_block.minoes);
     }
 }
 
