@@ -1,10 +1,5 @@
-#![allow(dead_code)]
+#![allow(dead_code, unused)]
 
 mod tetris;
 
-use tetris::{Human, Tetris};
-
-fn main() {
-    let tetris = Tetris::new();
-    tetris.start::<Human>();
-}
+fn main() {}
