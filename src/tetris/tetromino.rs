@@ -1,46 +1,31 @@
-use std::{
-    ops::{Add, Sub},
-    time::Duration,
-};
+use std::{ops::AddAssign, time::Duration};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone)]
 pub(super) struct Tetromino {
     center: Center,
     minoes: [Mino; 4],
 }
 
 impl Tetromino {
-    pub(super) fn rotate(&self, rotation: Rotation) -> Self {
-        Tetromino {
-            minoes: self.minoes.map(|mino| mino.rotate(rotation)),
-            ..(*self)
-        }
+    pub(super) fn rotate(mut self, rotation: Rotation) -> Self {
+        self.minoes = self.minoes.map(|mino| mino.rotate(rotation));
+        self
     }
 
-    pub(super) fn fall(&self, speed: f32, delta_time: Duration) -> Self {
-        Tetromino {
-            center: Center {
-                row: self.center.row - (speed * delta_time.as_secs_f32()),
-                ..self.center
-            },
-            ..*self
-        }
+    pub(super) fn fall(mut self, speed: f32, delta_time: Duration) -> Self {
+        self.center.row -= speed * delta_time.as_secs_f32();
+        self
     }
 
-    pub(super) fn shift(&self, shifter: Shifter) -> Self {
-        Tetromino {
-            center: Center {
-                column: self.center.column + shifter.x_axis_shift().into(),
-                ..self.center
-            },
-            ..*self
-        }
+    pub(super) fn shift(mut self, shifter: Shifter) -> Self {
+        self.center.column += shifter.x_axis_shift().into();
+        self
     }
 
     pub(super) fn snap_to_grid(&self) -> [Snapped; 4] {
-        self.minoes.map(|mino| Snapped {
+        self.minoes.clone().map(|mino| Snapped {
             row: (self.center.row + f32::from(mino.y_to_center)).floor() as i8,
-            column: (f32::from(self.center.column) + f32::from(mino.x_to_center)).floor() as i8,
+            column: (f32::from(self.center.column.clone()) + f32::from(mino.x_to_center)).floor() as i8,
         })
     }
 }
@@ -107,7 +92,7 @@ fn test_tetromino_snapping() {
 
     use itertools::Itertools;
 
-    fn get_distances<T>(coordinates: [T; 4]) -> Vec<f32>
+    fn get_distances<T>(coordinates: &[T; 4]) -> Vec<f32>
     where
         Vector2: From<T>,
         T: Clone,
@@ -122,24 +107,28 @@ fn test_tetromino_snapping() {
     let t_block = TetrominoType::Z.new();
 
     for fractional_part in (0..5000).map(|i| (i as f32) / 1000.0) {
-        let old_distances = get_distances(t_block.minoes);
+        let old_distances = get_distances(&t_block.minoes);
 
-        let snapped = Tetromino {
-            center: Center {
-                row: t_block.center.row - fractional_part,
-                ..t_block.center
-            },
-            ..t_block
-        }
-        .snap_to_grid();
+        let snapped = t_block
+            .clone()
+            .fall(fractional_part, Duration::from_secs(1))
+            .snap_to_grid();
+        // Tetromino {
+        //     center: Center {
+        //         row: t_block.center.row - fractional_part,
+        //         ..t_block.center
+        //     },
+        //     ..t_block
+        // }
+        // .snap_to_grid();
 
-        let new_distances = get_distances(snapped);
+        let new_distances = get_distances(&snapped);
 
         assert_eq!(old_distances, new_distances);
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct Mino {
     pub(super) x_to_center: HalfStep,
     pub(super) y_to_center: HalfStep,
@@ -153,7 +142,7 @@ impl Mino {
         }
     }
 
-    fn rotate(&self, rotation: Rotation) -> Self {
+    fn rotate(mut self, rotation: Rotation) -> Self {
         const NINETY_DEG_COS: f32 = -0.00000004371138828673792886547744274139404296875;
         const NINETY_DEG_SIN: f32 = 1.0;
 
@@ -165,10 +154,10 @@ impl Mino {
         let x_to_center: f32 = self.x_to_center.into();
         let y_to_center: f32 = self.y_to_center.into();
 
-        Mino::new(
-            x_to_center * ninety_deg_cos - y_to_center * ninety_deg_sin,
-            x_to_center * ninety_deg_sin + y_to_center * ninety_deg_cos,
-        )
+        self.x_to_center = (x_to_center * ninety_deg_cos - y_to_center * ninety_deg_sin).into();
+        self.y_to_center = (x_to_center * ninety_deg_sin + y_to_center * ninety_deg_cos).into();
+
+        self
     }
 }
 
@@ -181,7 +170,7 @@ fn test_mino_rotation() {
         Mino::new(-0.5, 0.5),
     ];
 
-    let rotated = minoes.map(|mino| mino.rotate(Rotation::Clockwise));
+    let rotated = minoes.clone().map(|mino| mino.rotate(Rotation::Clockwise));
 
     use std::iter::zip;
 
@@ -189,7 +178,7 @@ fn test_mino_rotation() {
 
     assert_eq!(minoes, rotated);
 
-    let rotated = minoes.map(|mino| mino.rotate(Rotation::Counterclockwise));
+    let rotated = minoes.clone().map(|mino| mino.rotate(Rotation::Counterclockwise));
 
     minoes.rotate_right(1);
 
@@ -285,7 +274,7 @@ pub(super) struct Snapped {
     pub(super) column: i8,
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Clone)]
 struct Center {
     row: f32,
     column: HalfStep,
@@ -330,7 +319,7 @@ impl Rotation {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct HalfStep(i8);
 
 impl From<f32> for HalfStep {
@@ -351,11 +340,9 @@ impl From<HalfStep> for f32 {
     }
 }
 
-impl Add for HalfStep {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self::Output {
-        HalfStep(self.0 + other.0)
+impl AddAssign for HalfStep {
+    fn add_assign(&mut self, other: Self) {
+        self.0 += other.0
     }
 }
 

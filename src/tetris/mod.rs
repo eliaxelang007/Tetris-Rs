@@ -8,6 +8,8 @@ use std::{
     process::exit,
 };
 
+use replace_with::replace_with_or_abort;
+
 use matrix::{Matrix, TetrominoValidity, PLAYFIELD_COLUMNS, PLAYFIELD_ROWS};
 use next_queue::NextQueue;
 use player::{Constructable, GameAction, Player, TetrisMove};
@@ -74,54 +76,53 @@ impl Tetris {
     }
 
     fn update(&mut self, delta_time: Duration, tetris_move: Option<TetrisMove>) {
-        let mut updated_tetromino = self.falling_tetromino;
+        let previous_tetromino = self.falling_tetromino.clone();
 
         let mut cell_fall_per_frame: f32 = 3.0;
 
         if let Some(tetris_move) = tetris_move {
             match tetris_move {
                 TetrisMove::Rotate(rotation) => {
-                    updated_tetromino = updated_tetromino.rotate(rotation);
+                    replace_with_or_abort(&mut self.falling_tetromino, |falling_tetromino| {
+                        falling_tetromino.rotate(rotation)
+                    });
                 }
 
                 TetrisMove::Shift(shifter) => {
-                    updated_tetromino = updated_tetromino.shift(shifter);
+                    replace_with_or_abort(&mut self.falling_tetromino, |falling_tetromino| {
+                        falling_tetromino.shift(shifter)
+                    });
                 }
 
-                // TetrisMove::HardDrop => {
-                //     cell_fall_per_frame *= 100.0;
-                // }
-
-                // TetrisMove::SoftDrop => {
-                //     cell_fall_per_frame *= 20.0;
-                // }
                 _ => {}
             }
         }
 
-        if self.matrix.validate(&updated_tetromino) == TetrominoValidity::Invalid {
-            updated_tetromino = self.falling_tetromino;
+        if self.matrix.validate(&self.falling_tetromino) == TetrominoValidity::Invalid {
+            self.falling_tetromino = previous_tetromino;
         }
 
-        updated_tetromino = updated_tetromino.fall(cell_fall_per_frame, delta_time);
+        let previous_tetromino = self.falling_tetromino.clone();
 
-        if self.matrix.validate(&updated_tetromino) == TetrominoValidity::Invalid {
-            self.matrix = self.matrix.solidify(self.falling_tetromino);
+        replace_with_or_abort(&mut self.falling_tetromino, |falling_tetromino| {
+            falling_tetromino.fall(cell_fall_per_frame, delta_time)
+        });
+
+        if self.matrix.validate(&self.falling_tetromino) == TetrominoValidity::Invalid {
+            replace_with_or_abort(&mut self.matrix, |matrix| matrix.solidify(previous_tetromino));
             self.falling_tetromino = self.next_queue.next().unwrap().new();
-        } else {
-            self.falling_tetromino = updated_tetromino;
         }
     }
 
     fn render(&self, terminal: &mut Terminal) {
         // There's no reason why these two functions should fail, so I think it's safe to unwrap them.
-        terminal.clear(ClearType::All).unwrap();
         terminal.write(self).unwrap();
+        terminal.clear(ClearType::All).unwrap();
     }
 }
 
 impl Display for Tetris {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{}", self.matrix.solidify(self.falling_tetromino.clone()))
+        write!(f, "{}", self.matrix.clone().solidify(self.falling_tetromino.clone()))
     }
 }

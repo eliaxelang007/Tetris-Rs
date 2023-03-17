@@ -4,6 +4,7 @@ use std::fmt::{Debug, Display, Formatter, Result};
 pub(super) const PLAYFIELD_ROWS: usize = 20;
 pub(super) const PLAYFIELD_COLUMNS: usize = 10;
 
+#[derive(Clone)]
 pub(super) struct Matrix {
     cells: [[Cell; PLAYFIELD_COLUMNS]; PLAYFIELD_ROWS],
 }
@@ -15,14 +16,12 @@ impl Matrix {
         }
     }
 
-    pub(super) fn solidify(&self, tetromino: Tetromino) -> Self {
-        let mut copy = self.cells.clone();
-
+    pub(super) fn solidify(mut self, tetromino: Tetromino) -> Self {
         for position in tetromino.snap_to_grid() {
-            copy[position.row as usize][position.column as usize] = Cell::Filled;
+            self.cells[position.row as usize][position.column as usize] = Cell::Filled;
         }
 
-        Matrix { cells: copy }
+        self
     }
 
     pub(super) fn validate(&self, tetromino: &Tetromino) -> TetrominoValidity {
@@ -43,15 +42,16 @@ impl Display for Matrix {
             f,
             "{}",
             self.cells
-                .map(|row| {
-                    row.map(|cell| match cell {
-                        Cell::Empty => '░',
-                        Cell::Filled => '█',
-                    })
-                })
                 .iter()
+                .map(|row| {
+                    row.iter()
+                        .map(|cell| match cell {
+                            Cell::Empty => '░',
+                            Cell::Filled => '█',
+                        })
+                        .collect::<String>()
+                })
                 .rev()
-                .map(|row| row.iter().collect::<String>())
                 .collect::<Vec<String>>()
                 .join("\n")
         )
