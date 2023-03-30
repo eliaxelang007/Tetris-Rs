@@ -18,7 +18,7 @@ pub use player::Human;
 pub struct Tetris {
     matrix: Matrix,
     falling_tetromino: Tetromino,
-    next_queue: NextQueue,
+    next_queue: NextQueue<5>,
 }
 
 use crossterm_terminal::{ClearType, Terminal};
@@ -30,7 +30,7 @@ impl Tetris {
 
         Tetris {
             matrix: Matrix::new(),
-            falling_tetromino: next_queue.next().unwrap().new(),
+            falling_tetromino: next_queue.next().unwrap().new(), // Safe because [NextQueue::next] will never return [None]
             next_queue: next_queue,
         }
     }
@@ -41,12 +41,6 @@ impl Tetris {
         let mut terminal = Terminal::new();
 
         let mut player = T::new();
-
-        let (columns, rows) = terminal.size().unwrap(); // Safe because this shouldn't fail
-
-        terminal
-            .set_size((PLAYFIELD_COLUMNS as u16), (PLAYFIELD_ROWS as u16))
-            .unwrap(); // Safe because this shouldn't fail
 
         loop {
             let current_time = Instant::now();
@@ -69,8 +63,6 @@ impl Tetris {
 
             self.render(&mut terminal);
         }
-
-        terminal.set_size(columns, rows).unwrap(); // Safe because this shouldn't fail
     }
 
     fn update(mut self, delta_time: Duration, tetris_move: Option<TetrisMove>) -> Self {
@@ -122,6 +114,11 @@ impl Tetris {
 
 impl Display for Tetris {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{}", self.matrix.clone().solidify(self.falling_tetromino.clone()))
+        write!(
+            f,
+            "{}    {}",
+            self.matrix.clone().solidify(self.falling_tetromino.clone()),
+            self.next_queue
+        )
     }
 }
