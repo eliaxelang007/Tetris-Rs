@@ -24,6 +24,29 @@ impl Matrix {
         self
     }
 
+    pub(super) fn clear_lines(mut self) -> Self {
+        fn clear_lines(matrix: &mut [[Cell; PLAYFIELD_COLUMNS]]) {
+            let length = matrix.len();
+
+            for (index, line) in matrix.iter().enumerate() {
+                if line.filled() {
+                    let shift_down_range = (index + 1)..length;
+
+                    let cleared = clear_lines(&mut matrix[shift_down_range.clone()]);
+                    matrix.copy_within(shift_down_range, index);
+
+                    matrix[length - 1] = [Cell::Empty; PLAYFIELD_COLUMNS];
+
+                    break;
+                }
+            }
+        }
+
+        clear_lines(&mut self.cells);
+
+        self
+    }
+
     pub(super) fn validate(&self, tetromino: &Tetromino) -> TetrominoValidity {
         match tetromino.snap_to_grid().iter().all(|Snapped { row, column }| {
             (0..(PLAYFIELD_ROWS as i8)).contains(&row)
@@ -43,6 +66,7 @@ impl Display for Matrix {
             "{}",
             self.cells
                 .iter()
+                .rev()
                 .map(|row| {
                     row.iter()
                         .map(|cell| match cell {
@@ -51,10 +75,19 @@ impl Display for Matrix {
                         })
                         .collect::<String>()
                 })
-                .rev()
                 .collect::<Vec<String>>()
                 .join("\n")
         )
+    }
+}
+
+trait RowExtension {
+    fn filled(&self) -> bool;
+}
+
+impl RowExtension for [Cell; PLAYFIELD_COLUMNS] {
+    fn filled(&self) -> bool {
+        self.iter().all(|&cell| cell == Cell::Filled)
     }
 }
 

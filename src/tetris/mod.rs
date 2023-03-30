@@ -8,8 +8,6 @@ use std::{
     process::exit,
 };
 
-use replace_with::replace_with_or_abort;
-
 use matrix::{Matrix, TetrominoValidity, PLAYFIELD_COLUMNS, PLAYFIELD_ROWS};
 use next_queue::NextQueue;
 use player::{Constructable, GameAction, Player, TetrisMove};
@@ -37,7 +35,7 @@ impl Tetris {
         }
     }
 
-    pub fn start<T: Player + Constructable>(&mut self) {
+    pub fn start<T: Player + Constructable>(mut self) {
         let mut previous_time = Instant::now();
 
         let mut terminal = Terminal::new();
@@ -56,7 +54,7 @@ impl Tetris {
 
             previous_time = current_time;
 
-            self.update(
+            self = self.update(
                 delta_time,
                 match player.next() {
                     Some(action) => match action {
@@ -75,7 +73,7 @@ impl Tetris {
         terminal.set_size(columns, rows).unwrap(); // Safe because this shouldn't fail
     }
 
-    fn update(&mut self, delta_time: Duration, tetris_move: Option<TetrisMove>) {
+    fn update(mut self, delta_time: Duration, tetris_move: Option<TetrisMove>) -> Self {
         let previous_tetromino = self.falling_tetromino.clone();
 
         let mut cell_fall_per_frame: f32 = 3.0;
@@ -83,15 +81,15 @@ impl Tetris {
         if let Some(tetris_move) = tetris_move {
             match tetris_move {
                 TetrisMove::Rotate(rotation) => {
-                    replace_with_or_abort(&mut self.falling_tetromino, |falling_tetromino| {
-                        falling_tetromino.rotate(rotation)
-                    });
+                    self.falling_tetromino = self.falling_tetromino.rotate(rotation);
                 }
 
                 TetrisMove::Shift(shifter) => {
-                    replace_with_or_abort(&mut self.falling_tetromino, |falling_tetromino| {
-                        falling_tetromino.shift(shifter)
-                    });
+                    self.falling_tetromino = self.falling_tetromino.shift(shifter);
+                }
+
+                TetrisMove::SoftDrop => {
+                    cell_fall_per_frame *= 20.0;
                 }
 
                 _ => {}
@@ -104,14 +102,15 @@ impl Tetris {
 
         let previous_tetromino = self.falling_tetromino.clone();
 
-        replace_with_or_abort(&mut self.falling_tetromino, |falling_tetromino| {
-            falling_tetromino.fall(cell_fall_per_frame, delta_time)
-        });
+        self.falling_tetromino = self.falling_tetromino.fall(cell_fall_per_frame, delta_time);
 
         if self.matrix.validate(&self.falling_tetromino) == TetrominoValidity::Invalid {
-            replace_with_or_abort(&mut self.matrix, |matrix| matrix.solidify(previous_tetromino));
+            self.matrix = self.matrix.solidify(previous_tetromino).clear_lines();
+
             self.falling_tetromino = self.next_queue.next().unwrap().new();
         }
+
+        self
     }
 
     fn render(&self, terminal: &mut Terminal) {
