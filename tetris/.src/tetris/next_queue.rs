@@ -1,7 +1,6 @@
 use super::tetromino::TetrominoType;
 
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
-use std::fmt::{Debug, Display, Formatter, Result};
 use strum::{EnumCount, IntoEnumIterator};
 
 #[derive(Clone)]
@@ -100,8 +99,8 @@ impl<const SIZE: usize> Iterator for NextQueue<SIZE> {
     }
 }
 
-impl<const SIZE: usize> Display for NextQueue<SIZE> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{:?}", self.upcoming().collect::<Vec<&TetrominoType>>())
-    }
-}
+// impl<const SIZE: usize> Display for NextQueue<SIZE> {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+//         write!(f, "{:?}", self.upcoming().collect::<Vec<&TetrominoType>>())
+//     }
+// }

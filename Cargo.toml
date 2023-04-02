@@ -1,15 +1,2 @@
-[package]
-name = "tetris"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-crossterm_terminal = "0.3.2"
-crossterm_input = "0.5.0"
-strum = { version = "0.24.1", features = ["derive"] }
-rand = "0.8.5"
-
-[dev-dependencies]
-itertools = "0.10.5"
+[workspace]
+members = ["tetris", "raylib"]

@@ -1,5 +1,4 @@
 use super::tetromino::{Snapped, Tetromino};
-use std::fmt::{Debug, Display, Formatter, Result};
 
 pub(super) const PLAYFIELD_ROWS: usize = 20;
 pub(super) const PLAYFIELD_COLUMNS: usize = 10;
@@ -59,27 +58,36 @@ impl Matrix {
     }
 }
 
-impl Display for Matrix {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(
-            f,
-            "{}",
-            self.cells
-                .iter()
-                .rev()
-                .map(|row| {
-                    row.iter()
-                        .map(|cell| match cell {
-                            Cell::Empty => '░',
-                            Cell::Filled => '█',
-                        })
-                        .collect::<String>()
-                })
-                .collect::<Vec<String>>()
-                .join("\n")
-        )
+use super::graphics::Drawable;
+use raylib::prelude::{color::Color, RaylibDraw, RaylibDrawHandle};
+
+impl Drawable for Matrix {
+    fn draw(&self, canvas: &mut RaylibDrawHandle) {
+        canvas.draw_rectangle(0, 0, 100, 100, Color::WHITE);
     }
 }
+
+// impl Display for Matrix {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+//         write!(
+//             f,
+//             "{}",
+//             self.cells
+//                 .iter()
+//                 .rev()
+//                 .map(|row| {
+//                     row.iter()
+//                         .map(|cell| match cell {
+//                             Cell::Empty => '░',
+//                             Cell::Filled => '█',
+//                         })
+//                         .collect::<String>()
+//                 })
+//                 .collect::<Vec<String>>()
+//                 .join("\n")
+//         )
+//     }
+// }
 
 trait RowExtension {
     fn filled(&self) -> bool;

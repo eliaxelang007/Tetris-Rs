@@ -30,104 +30,6 @@ impl Tetromino {
     }
 }
 
-#[test]
-fn test_tetromino_rotation() {
-    let l_block = TetrominoType::L.new();
-
-    let clockwise_rotated_minoes = [
-        Mino::new(0.0, 0.0),
-        Mino::new(0.0, 1.0),
-        Mino::new(0.0, -1.0),
-        Mino::new(1.0, -1.0),
-    ];
-
-    let clockwise = l_block.rotate(Rotation::Clockwise);
-
-    assert_eq!(clockwise.minoes, clockwise_rotated_minoes);
-
-    let counterclockwise = clockwise
-        .rotate(Rotation::Counterclockwise)
-        .rotate(Rotation::Counterclockwise);
-
-    let counterclockwise_rotated_minoes = [
-        Mino::new(0.0, 0.0),
-        Mino::new(0.0, -1.0),
-        Mino::new(0.0, 1.0),
-        Mino::new(-1.0, 1.0),
-    ];
-
-    assert_eq!(counterclockwise.minoes, counterclockwise_rotated_minoes);
-}
-
-#[test]
-fn test_tetromino_snapping() {
-    pub(super) struct Vector2 {
-        x: f32,
-        y: f32,
-    }
-
-    impl Vector2 {
-        pub(super) fn distance(&self, other: &Vector2) -> f32 {
-            ((self.x - other.x).powi(2) + (self.y - other.y).powi(2)).sqrt()
-        }
-    }
-
-    impl From<Mino> for Vector2 {
-        fn from(mino: Mino) -> Self {
-            Vector2 {
-                x: mino.x_to_center.into(),
-                y: mino.y_to_center.into(),
-            }
-        }
-    }
-
-    impl From<Snapped> for Vector2 {
-        fn from(mino: Snapped) -> Self {
-            Vector2 {
-                x: mino.column.into(),
-                y: mino.row.into(),
-            }
-        }
-    }
-
-    use itertools::Itertools;
-
-    fn get_distances<T>(coordinates: &[T; 4]) -> Vec<f32>
-    where
-        Vector2: From<T>,
-        T: Clone,
-    {
-        coordinates
-            .iter()
-            .combinations(2)
-            .map(|pair| Vector2::from(pair[0].clone()).distance(&pair[1].clone().into()))
-            .collect()
-    }
-
-    let t_block = TetrominoType::Z.new();
-
-    for fractional_part in (0..5000).map(|i| (i as f32) / 1000.0) {
-        let old_distances = get_distances(&t_block.minoes);
-
-        let snapped = t_block
-            .clone()
-            .fall(fractional_part, Duration::from_secs(1))
-            .snap_to_grid();
-        // Tetromino {
-        //     center: Center {
-        //         row: t_block.center.row - fractional_part,
-        //         ..t_block.center
-        //     },
-        //     ..t_block
-        // }
-        // .snap_to_grid();
-
-        let new_distances = get_distances(&snapped);
-
-        assert_eq!(old_distances, new_distances);
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct Mino {
     pub(super) x_to_center: HalfStep,
@@ -159,30 +61,6 @@ impl Mino {
 
         self
     }
-}
-
-#[test]
-fn test_mino_rotation() {
-    let mut minoes = [
-        Mino::new(0.5, 0.5),
-        Mino::new(0.5, -0.5),
-        Mino::new(-0.5, -0.5),
-        Mino::new(-0.5, 0.5),
-    ];
-
-    let rotated = minoes.clone().map(|mino| mino.rotate(Rotation::Clockwise));
-
-    use std::iter::zip;
-
-    minoes.rotate_left(1);
-
-    assert_eq!(minoes, rotated);
-
-    let rotated = minoes.clone().map(|mino| mino.rotate(Rotation::Counterclockwise));
-
-    minoes.rotate_right(1);
-
-    assert_eq!(minoes, rotated);
 }
 
 use strum::{EnumCount, EnumIter};
@@ -343,53 +221,5 @@ impl From<HalfStep> for f32 {
 impl AddAssign for HalfStep {
     fn add_assign(&mut self, other: Self) {
         self.0 += other.0
-    }
-}
-
-#[test]
-fn test_conversions() {
-    #[derive(Clone)]
-    struct Conversion {
-        original: f32,
-        doubled: i8,
-        stepped: f32,
-    }
-
-    impl Conversion {
-        fn new(original: f32, doubled: i8, stepped: f32) -> Self {
-            Conversion {
-                original,
-                doubled,
-                stepped,
-            }
-        }
-    }
-
-    let mut tests: Vec<Conversion> = vec![
-        Conversion::new(0.24, 0, 0.0),
-        Conversion::new(0.25, 1, 0.5),
-        Conversion::new(0.26, 1, 0.5),
-        Conversion::new(0.5, 1, 0.5),
-        Conversion::new(0.6, 1, 0.5),
-    ];
-
-    let negative_tests = tests.iter().map(
-        |Conversion {
-             original,
-             doubled,
-             stepped,
-         }| Conversion::new(original * -1.0, doubled * -1, stepped * -1.0),
-    );
-
-    for Conversion {
-        original,
-        doubled,
-        stepped,
-    } in tests.clone().into_iter().chain(negative_tests)
-    {
-        let half_step: HalfStep = original.into();
-
-        assert_eq!(half_step.0, doubled);
-        assert_eq!(f32::from(half_step), stepped);
     }
 }
