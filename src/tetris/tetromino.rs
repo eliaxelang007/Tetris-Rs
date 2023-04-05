@@ -4,6 +4,7 @@ use std::{ops::AddAssign, time::Duration};
 pub(super) struct Tetromino {
     center: Center,
     minoes: [Mino; 4],
+    kind: TetrominoType,
 }
 
 impl Tetromino {
@@ -27,6 +28,21 @@ impl Tetromino {
             row: (self.center.row + f32::from(mino.y_to_center)).floor() as i8,
             column: (f32::from(self.center.column.clone()) + f32::from(mino.x_to_center)).floor() as i8,
         })
+    }
+}
+
+use super::raylib::{
+    drawing::{Canvas, Color, Drawable, RectangleGraphic},
+    shapes::{Rectangle, Vector2},
+};
+
+struct TetrominoGraphic<'a> {
+    tetromino: &'a Tetromino,
+}
+
+impl<'a, 'b> Drawable<'a> for TetrominoGraphic<'b> {
+    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+        todo!()
     }
 }
 
@@ -78,8 +94,11 @@ pub(super) enum TetrominoType {
 
 impl TetrominoType {
     pub(super) fn new(&self) -> Tetromino {
+        use TetrominoType::*;
+
         match self {
-            TetrominoType::O => Tetromino {
+            O => Tetromino {
+                kind: O,
                 center: Center::new(19.5 - 1.0, 5.5 - 1.0),
                 minoes: [
                     Mino::new(-0.5, 0.5),
@@ -88,7 +107,8 @@ impl TetrominoType {
                     Mino::new(-0.5, -0.5),
                 ],
             },
-            TetrominoType::I => Tetromino {
+            I => Tetromino {
+                kind: I,
                 center: Center::new(18.5 - 1.0, 5.5 - 1.0),
                 minoes: [
                     Mino::new(-1.5, 0.5),
@@ -97,7 +117,8 @@ impl TetrominoType {
                     Mino::new(1.5, 0.5),
                 ],
             },
-            TetrominoType::T => Tetromino {
+            T => Tetromino {
+                kind: T,
                 center: Center::new(19.0 - 1.0, 5.0 - 1.0),
                 minoes: [
                     Mino::new(0.0, 0.0),
@@ -106,7 +127,8 @@ impl TetrominoType {
                     Mino::new(1.0, 0.0),
                 ],
             },
-            TetrominoType::L => Tetromino {
+            L => Tetromino {
+                kind: L,
                 center: Center::new(19.0 - 1.0, 5.0 - 1.0),
                 minoes: [
                     Mino::new(0.0, 0.0),
@@ -115,7 +137,8 @@ impl TetrominoType {
                     Mino::new(1.0, 1.0),
                 ],
             },
-            TetrominoType::J => Tetromino {
+            J => Tetromino {
+                kind: J,
                 center: Center::new(19.0 - 1.0, 5.0 - 1.0),
                 minoes: [
                     Mino::new(0.0, 0.0),
@@ -124,7 +147,8 @@ impl TetrominoType {
                     Mino::new(-1.0, 1.0),
                 ],
             },
-            TetrominoType::S => Tetromino {
+            S => Tetromino {
+                kind: S,
                 center: Center::new(19.0 - 1.0, 5.0 - 1.0),
                 minoes: [
                     Mino::new(0.0, 0.0),
@@ -133,7 +157,8 @@ impl TetrominoType {
                     Mino::new(1.0, 1.0),
                 ],
             },
-            TetrominoType::Z => Tetromino {
+            Z => Tetromino {
+                kind: Z,
                 center: Center::new(19.0 - 1.0, 5.0 - 1.0),
                 minoes: [
                     Mino::new(0.0, 0.0),

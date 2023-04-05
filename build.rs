@@ -16,7 +16,8 @@ fn main() {
     let bindings = Builder::default()
         .header("raylib_c/include/wrapper.h")
         .rustified_enum(".*")
-        //.clang_arg(format!("--target={}", var("TARGET").unwrap()))
+        .clang_arg(format!("--target={}", var("TARGET").unwrap()))
+        .blocklist_type("__mingw_ldbl_type_t")
         .generate()
         .expect("Couldn't generate bindings.");
 

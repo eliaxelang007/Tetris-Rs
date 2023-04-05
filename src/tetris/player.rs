@@ -1,7 +1,7 @@
 use std::process::exit;
 
+use super::raylib::input::{Input, KeyboardKey};
 use super::tetromino::{Rotation, Shifter};
-use raylib::prelude::{KeyboardKey, RaylibHandle};
 
 #[derive(Clone)]
 pub enum TetrisMove {
@@ -11,9 +11,15 @@ pub enum TetrisMove {
     Shift(Shifter),
 }
 
-pub struct Human<'a> {
-    engine: &'a RaylibHandle,
+pub(super) struct Human<'a> {
+    pub(super) input: &'a Input,
 }
+
+// impl<'a> Human<'a> {
+//     pub() fn new(input: &'a Input) -> Self {
+//         Human { input }
+//     }
+// }
 
 impl Iterator for Human<'_> {
     type Item = TetrisMove;
@@ -32,10 +38,10 @@ impl Iterator for Human<'_> {
             (KEY_SPACE, HardDrop),
         ]
         .iter()
-        .find(|(key, _)| self.engine.is_key_down(*key))
+        .find(|(key, _)| self.input.key_down(*key))
         .map(|(_, action)| action.clone())
     }
 }
 
-pub trait Player: Iterator<Item = TetrisMove> {}
+pub(super) trait Player: Iterator<Item = TetrisMove> {}
 impl<T: Iterator<Item = TetrisMove>> Player for T {}

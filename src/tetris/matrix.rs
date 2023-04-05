@@ -58,12 +58,28 @@ impl Matrix {
     }
 }
 
-use super::graphics::Drawable;
-use raylib::prelude::{color::Color, RaylibDraw, RaylibDrawHandle};
+use super::raylib::{
+    drawing::{Canvas, Color, Drawable, RectangleGraphic},
+    shapes::{Rectangle, Vector2},
+};
 
-impl Drawable for Matrix {
-    fn draw(&self, canvas: &mut RaylibDrawHandle) {
-        canvas.draw_rectangle(0, 0, 100, 100, Color::WHITE);
+impl<'a> Drawable<'a> for Matrix {
+    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+        let window = &canvas.window;
+
+        let center_x = (window.width() / 2) as f32;
+        let center_y = (window.height() / 2) as f32;
+
+        canvas.draw(&RectangleGraphic {
+            rectangle: Rectangle {
+                size: Vector2 { x: 100.0, y: 100.0 },
+            },
+            position: Vector2 {
+                x: center_x,
+                y: center_y,
+            },
+            color: Color::MAROON,
+        })
     }
 }
 

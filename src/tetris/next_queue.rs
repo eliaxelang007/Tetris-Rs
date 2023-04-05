@@ -1,3 +1,7 @@
+use super::raylib::{
+    drawing::{Canvas, Color, Drawable, RectangleGraphic},
+    shapes::{Rectangle, Vector2},
+};
 use super::tetromino::TetrominoType;
 
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
@@ -96,6 +100,22 @@ impl<const SIZE: usize> Iterator for NextQueue<SIZE> {
         self.queue_item_index = (self.queue_item_index + 1) % (SIZE as u8);
 
         Some(next_piece)
+    }
+}
+
+struct NextQueueGraphic<'a, const SIZE: usize> {
+    next_queue: &'a NextQueue<SIZE>,
+}
+
+impl<'a, 'b, const SIZE: usize> Drawable<'a> for NextQueueGraphic<'b, SIZE> {
+    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+        canvas.draw(&RectangleGraphic {
+            rectangle: Rectangle {
+                size: Vector2 { x: 100.0, y: 100.0 },
+            },
+            position: Vector2 { x: 10.0, y: 10.0 },
+            color: Color::MAROON,
+        })
     }
 }
 

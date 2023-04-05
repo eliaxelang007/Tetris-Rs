@@ -1,8 +1,19 @@
 {
     "cSpell.words": [
         "fullscreen",
+        "mino",
+        "minoes",
         "msaa",
+        "PLAYFIELD",
+        "randomizer",
         "Raylib",
+        "rngs",
+        "signum",
+        "tetris",
+        "tetrominoes",
         "vsync"
-    ]
+    ],
+    "files.associations": {
+        "cmath": "cpp"
+    }
 }

@@ -1,3 +1,8 @@
+use super::raylib::{
+    drawing::{Background, Canvas, Color, Drawable, RectangleGraphic},
+    shapes::{Rectangle, Vector2},
+};
+
 use super::matrix::{Matrix, TetrominoValidity, PLAYFIELD_COLUMNS, PLAYFIELD_ROWS};
 use super::next_queue::NextQueue;
 use super::player::{Player, TetrisMove};
@@ -5,14 +10,14 @@ use super::tetromino::{Tetromino, TetrominoType};
 
 use std::time::Duration;
 
-pub struct Tetris {
+pub(super) struct Tetris {
     matrix: Matrix,
     falling_tetromino: Tetromino,
     next_queue: NextQueue<5>,
 }
 
 impl Tetris {
-    pub fn new() -> Self {
+    pub(super) fn new() -> Self {
         let mut next_queue = NextQueue::new();
 
         Tetris {
@@ -22,7 +27,7 @@ impl Tetris {
         }
     }
 
-    fn update(mut self, delta_time: Duration, action: Option<TetrisMove>) -> Self {
+    pub(super) fn update(mut self, delta_time: Duration, action: Option<TetrisMove>) -> Self {
         let previous_tetromino = self.falling_tetromino.clone();
 
         let mut cell_fall_per_frame: f32 = 3.0;
@@ -62,3 +67,42 @@ impl Tetris {
         self
     }
 }
+
+pub struct TetrisGraphic<'a> {
+    tetris: &'a Tetris,
+}
+
+impl Tetris {
+    pub fn graphic(&self) -> TetrisGraphic {
+        TetrisGraphic { tetris: self }
+    }
+}
+
+impl<'a, 'b> Drawable<'a> for TetrisGraphic<'b> {
+    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+        // canvas.draw(&RectangleGraphic {
+        //     rectangle: &Rectangle {
+        //         position: Vector2 { x: 10.0, y: 10.0 },
+        //         size: Vector2 { x: 100.0, y: 100.0 },
+        //     },
+        //     color: Color::MAROON,
+        // });
+
+        let tetris = self.tetris;
+
+        canvas.draw(&tetris.matrix)
+        // .draw(tetris.next_queue)
+        // .draw(tetris.falling_tetromino)
+    }
+}
+
+// impl Display for Tetris {
+//     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+//         write!(
+//             f,
+//             "{}    {}",
+//             self.matrix.clone().solidify(self.falling_tetromino.clone()),
+//             self.next_queue
+//         )
+//     }
+// }

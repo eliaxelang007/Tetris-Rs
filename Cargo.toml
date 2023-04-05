@@ -1,2 +1,16 @@
-[workspace]
-members = ["tetris", "raylib"]
+[package]
+name = "tetris"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+strum = { version = "0.24.1", features = ["derive"] }
+rand = "0.8.5"
+
+[dev-dependencies]
+itertools = "0.10.5"
+
+[build-dependencies]
+bindgen = "0.64.0"
