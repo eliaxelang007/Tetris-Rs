@@ -103,17 +103,13 @@ impl<const SIZE: usize> Iterator for NextQueue<SIZE> {
     }
 }
 
-struct NextQueueGraphic<'a, const SIZE: usize> {
-    next_queue: &'a NextQueue<SIZE>,
-}
-
-impl<'a, 'b, const SIZE: usize> Drawable<'a> for NextQueueGraphic<'b, SIZE> {
+impl<'a, const SIZE: usize> Drawable<'a> for NextQueue<SIZE> {
     fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
         canvas.draw(&RectangleGraphic {
             rectangle: Rectangle {
-                size: Vector2 { x: 100.0, y: 100.0 },
+                size: Vector2 { x: 232.0, y: 712.0 },
             },
-            position: Vector2 { x: 10.0, y: 10.0 },
+            position: Vector2 { x: 883.0, y: 21.0 },
             color: Color::MAROON,
         })
     }

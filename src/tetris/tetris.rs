@@ -59,8 +59,7 @@ impl Tetris {
         self.falling_tetromino = self.falling_tetromino.fall(cell_fall_per_frame, delta_time);
 
         if self.matrix.validate(&self.falling_tetromino) == TetrominoValidity::Invalid {
-            self.matrix = self.matrix.solidify(previous_tetromino).clear_lines();
-
+            self.matrix = self.matrix.solidify(&previous_tetromino).clear_lines();
             self.falling_tetromino = self.next_queue.next().unwrap().new();
         }
 
@@ -68,41 +67,9 @@ impl Tetris {
     }
 }
 
-pub struct TetrisGraphic<'a> {
-    tetris: &'a Tetris,
-}
-
-impl Tetris {
-    pub fn graphic(&self) -> TetrisGraphic {
-        TetrisGraphic { tetris: self }
-    }
-}
-
-impl<'a, 'b> Drawable<'a> for TetrisGraphic<'b> {
+impl<'a> Drawable<'a> for Tetris {
     fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
-        // canvas.draw(&RectangleGraphic {
-        //     rectangle: &Rectangle {
-        //         position: Vector2 { x: 10.0, y: 10.0 },
-        //         size: Vector2 { x: 100.0, y: 100.0 },
-        //     },
-        //     color: Color::MAROON,
-        // });
-
-        let tetris = self.tetris;
-
-        canvas.draw(&tetris.matrix)
-        // .draw(tetris.next_queue)
-        // .draw(tetris.falling_tetromino)
+        let matrix = self.matrix.clone().solidify(&self.falling_tetromino);
+        canvas.draw(&matrix).draw(&self.next_queue)
     }
 }
-
-// impl Display for Tetris {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-//         write!(
-//             f,
-//             "{}    {}",
-//             self.matrix.clone().solidify(self.falling_tetromino.clone()),
-//             self.next_queue
-//         )
-//     }
-// }

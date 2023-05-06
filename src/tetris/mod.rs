@@ -23,8 +23,13 @@ pub struct Game {
 
 impl Game {
     pub fn new() -> Self {
+        const WINDOW_WIDTH: u16 = 1256;
+        const WINDOW_HEIGHT: u16 = 942;
+
         Game {
-            raylib: RaylibBuilder::new("Tetris in Rust", 800, 450).vsync().build(),
+            raylib: RaylibBuilder::new("Tetris in Rust", WINDOW_WIDTH, WINDOW_HEIGHT)
+                .vsync()
+                .build(),
             tetris: Tetris::new(),
         }
     }
@@ -44,7 +49,7 @@ impl Game {
                 .draw(&Background {
                     color: Color::RAY_WHITE,
                 })
-                .draw(&self.tetris.graphic());
+                .draw(&self.tetris);
         }
     }
 }

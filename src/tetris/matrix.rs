@@ -15,7 +15,7 @@ impl Matrix {
         }
     }
 
-    pub(super) fn solidify(mut self, tetromino: Tetromino) -> Self {
+    pub(super) fn solidify(mut self, tetromino: &Tetromino) -> Self {
         for position in tetromino.snap_to_grid() {
             self.cells[position.row as usize][position.column as usize] = Cell::Filled;
         }
@@ -65,45 +65,46 @@ use super::raylib::{
 
 impl<'a> Drawable<'a> for Matrix {
     fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
-        let window = &canvas.window;
+        const CELL_SIZE: f32 = 45.0;
 
-        let center_x = (window.width() / 2) as f32;
-        let center_y = (window.height() / 2) as f32;
+        const TOP_RIGHT_CELL_POSITION: Vector2 = Vector2 { x: 403.0, y: 21.0 };
 
-        canvas.draw(&RectangleGraphic {
-            rectangle: Rectangle {
-                size: Vector2 { x: 100.0, y: 100.0 },
-            },
-            position: Vector2 {
-                x: center_x,
-                y: center_y,
-            },
-            color: Color::MAROON,
-        })
+        let mut canvas = canvas;
+
+        for row in 0..PLAYFIELD_ROWS {
+            for column in 0..PLAYFIELD_COLUMNS {
+                canvas = canvas.draw(&RectangleGraphic {
+                    rectangle: Rectangle {
+                        size: Vector2 {
+                            x: CELL_SIZE,
+                            y: CELL_SIZE,
+                        },
+                    },
+                    position: TOP_RIGHT_CELL_POSITION
+                        + Vector2 {
+                            x: CELL_SIZE * (column as f32),
+                            y: CELL_SIZE * ((PLAYFIELD_ROWS - row - 1) as f32),
+                        },
+                    color: if self.cells[row][column] == Cell::Filled {
+                        Color::MAROON
+                    } else {
+                        Color::GRAY
+                    },
+                });
+            }
+        }
+
+        canvas
+
+        // canvas.draw(&RectangleGraphic {
+        //     rectangle: Rectangle {
+        //         size: Vector2 { x: 450.0, y: 900.0 },
+        //     },
+        //     position: Vector2 { x: 403.0, y: 21.0 },
+        //     color: Color::MAROON,
+        // })
     }
 }
-
-// impl Display for Matrix {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-//         write!(
-//             f,
-//             "{}",
-//             self.cells
-//                 .iter()
-//                 .rev()
-//                 .map(|row| {
-//                     row.iter()
-//                         .map(|cell| match cell {
-//                             Cell::Empty => '░',
-//                             Cell::Filled => '█',
-//                         })
-//                         .collect::<String>()
-//                 })
-//                 .collect::<Vec<String>>()
-//                 .join("\n")
-//         )
-//     }
-// }
 
 trait RowExtension {
     fn filled(&self) -> bool;

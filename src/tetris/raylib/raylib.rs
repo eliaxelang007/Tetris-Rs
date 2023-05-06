@@ -12,9 +12,7 @@ impl Raylib {
         Raylib {
             _use_raylib_builder_instead: (),
             window: Window::new(title, width, height, flags),
-            input: Input {
-                _use_raylib_builder_instead: (),
-            },
+            input: Input(()),
         }
     }
 }
