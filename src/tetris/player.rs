@@ -29,17 +29,20 @@ impl Iterator for Human<'_> {
         use Rotation::*;
         use TetrisMove::*;
 
-        [
-            (KEY_RIGHT, Shift(Shifter::Right)),
-            (KEY_LEFT, Shift(Shifter::Left)),
-            (KEY_UP, Rotate(Clockwise)),
-            (KEY_Z, Rotate(Counterclockwise)),
-            (KEY_DOWN, SoftDrop),
-            (KEY_SPACE, HardDrop),
-        ]
-        .iter()
-        .find(|(key, _)| self.input.key_down(*key))
-        .map(|(_, action)| action.clone())
+        let key_down: Box<dyn Fn(KeyboardKey) -> bool> = Box::new(|key| self.input.key_down(key));
+        let key_pressed: Box<dyn Fn(KeyboardKey) -> bool> = Box::new(|key| self.input.key_pressed(key));
+
+        Some(
+            [
+                (&key_down, KEY_RIGHT, Shift(Step::Right)),
+                (&key_down, KEY_LEFT, Shift(Step::Left)),
+                (&key_pressed, KEY_UP, Rotate(Clockwise)),
+                (&key_pressed, KEY_LEFT_CONTROL, Rotate(Counterclockwise)),
+                (&key_down, KEY_DOWN, SoftDrop),
+                (&key_pressed, KEY_SPACE, HardDrop),
+            ]
+            .map(|(reader, key, action)| (action, reader(key))),
+        )
     }
 }
 
