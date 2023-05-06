@@ -38,8 +38,8 @@ impl Tetris {
                     self.falling_tetromino = self.falling_tetromino.rotate(rotation);
                 }
 
-                TetrisMove::Shift(shifter) => {
-                    self.falling_tetromino = self.falling_tetromino.shift(shifter);
+                TetrisMove::Shift(step) => {
+                    self.falling_tetromino = self.falling_tetromino.shift(step);
                 }
 
                 TetrisMove::SoftDrop => {

@@ -18,8 +18,8 @@ impl Tetromino {
         self
     }
 
-    pub(super) fn shift(mut self, shifter: Shifter) -> Self {
-        self.center.column += shifter.x_axis_shift().into();
+    pub(super) fn shift(mut self, step: Step) -> Self {
+        self.center.column += step.x_axis_step().into();
         self
     }
 
@@ -199,16 +199,16 @@ pub enum Rotation {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum Shifter {
+pub enum Step {
     Left,
     Right,
 }
 
-impl Shifter {
-    fn x_axis_shift(&self) -> i8 {
+impl Step {
+    fn x_axis_step(&self) -> i8 {
         match self {
-            Shifter::Left => -1,
-            Shifter::Right => 1,
+            Step::Left => -1,
+            Step::Right => 1,
         }
     }
 }

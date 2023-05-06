@@ -1,14 +1,14 @@
 use std::process::exit;
 
 use super::raylib::input::{Input, KeyboardKey};
-use super::tetromino::{Rotation, Shifter};
+use super::tetromino::{Rotation, Step};
 
 #[derive(Clone)]
 pub enum TetrisMove {
     Rotate(Rotation),
     HardDrop,
     SoftDrop,
-    Shift(Shifter),
+    Shift(Step),
 }
 
 pub(super) struct Human<'a> {
@@ -21,8 +21,10 @@ pub(super) struct Human<'a> {
 //     }
 // }
 
+pub(super) type Moves = [(TetrisMove, bool); 6];
+
 impl Iterator for Human<'_> {
-    type Item = TetrisMove;
+    type Item = Moves;
 
     fn next(&mut self) -> Option<Self::Item> {
         use KeyboardKey::*;
