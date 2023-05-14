@@ -21,7 +21,7 @@ pub(super) struct Human<'a> {
 //     }
 // }
 
-pub(super) type Moves = [(TetrisMove, bool); 6];
+pub(super) type Moves = Vec<TetrisMove>;
 
 impl Iterator for Human<'_> {
     type Item = Moves;
@@ -43,7 +43,9 @@ impl Iterator for Human<'_> {
                 (&key_down, KEY_DOWN, SoftDrop),
                 (&key_pressed, KEY_SPACE, HardDrop),
             ]
-            .map(|(reader, key, action)| (action, reader(key))),
+            .iter()
+            .filter_map(|(reader, key, action)| if reader(*key) { Some(action.clone()) } else { None })
+            .collect(),
         )
     }
 }

@@ -5,7 +5,7 @@ use super::raylib::{
 
 use super::matrix::{Matrix, TetrominoValidity, PLAYFIELD_COLUMNS, PLAYFIELD_ROWS};
 use super::next_queue::NextQueue;
-use super::player::{Player, TetrisMove};
+use super::player::{Moves, Player, TetrisMove};
 use super::tetromino::{Tetromino, TetrominoType};
 
 use std::time::Duration;
@@ -22,28 +22,32 @@ impl Tetris {
 
         Tetris {
             matrix: Matrix::new(),
-            falling_tetromino: next_queue.next().unwrap().new(), // Safe because [NextQueue::next] will never return [None]
+            falling_tetromino: next_queue
+                .next()
+                .expect("Should be safe because [NextQueue::next] will never return [None]")
+                .new(),
             next_queue: next_queue,
         }
     }
 
-    pub(super) fn update(mut self, delta_time: Duration, action: Option<TetrisMove>) -> Self {
+    pub(super) fn update(mut self, delta_time: Duration, actions: Moves) -> Self {
         let previous_tetromino = self.falling_tetromino.clone();
 
-        let mut cell_fall_per_frame: f32 = 3.0;
+        let mut fall_speed: f32 = 2.0;
+        let shift_speed: f32 = 13.0;
 
-        if let Some(tetris_move) = action {
+        for tetris_move in actions {
             match tetris_move {
                 TetrisMove::Rotate(rotation) => {
                     self.falling_tetromino = self.falling_tetromino.rotate(rotation);
                 }
 
                 TetrisMove::Shift(step) => {
-                    self.falling_tetromino = self.falling_tetromino.shift(step);
+                    self.falling_tetromino = self.falling_tetromino.shift(step, shift_speed, delta_time);
                 }
 
                 TetrisMove::SoftDrop => {
-                    cell_fall_per_frame *= 20.0;
+                    fall_speed *= 10.0;
                 }
 
                 _ => {}
@@ -56,7 +60,7 @@ impl Tetris {
 
         let previous_tetromino = self.falling_tetromino.clone();
 
-        self.falling_tetromino = self.falling_tetromino.fall(cell_fall_per_frame, delta_time);
+        self.falling_tetromino = self.falling_tetromino.fall(fall_speed, delta_time);
 
         if self.matrix.validate(&self.falling_tetromino) == TetrominoValidity::Invalid {
             self.matrix = self.matrix.solidify(&previous_tetromino).clear_lines();

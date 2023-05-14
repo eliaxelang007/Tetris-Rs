@@ -23,7 +23,7 @@ impl Bag {
                 let mut bag: [TetrominoType; TetrominoType::COUNT] = TetrominoType::iter()
                     .collect::<Vec<TetrominoType>>()
                     .try_into()
-                    .unwrap(); // Safe because [TetrominoType::iter] will always have the length of [TetrominoType::COUNT]
+                    .expect("Should be safe because [TetrominoType::iter] will always have the length of [TetrominoType::COUNT]");
 
                 bag.shuffle(&mut randomizer);
 
@@ -73,7 +73,7 @@ impl<const SIZE: usize> NextQueue<SIZE> {
                 .take(SIZE)
                 .collect::<Vec<TetrominoType>>()
                 .try_into()
-                .unwrap(), // Safe because [Bag::next] will never return [None]
+                .expect("Should be safe because [Bag::next] will never return [None]"),
             bag: bag,
             queue_item_index: 0,
         }
@@ -96,7 +96,10 @@ impl<const SIZE: usize> Iterator for NextQueue<SIZE> {
 
         let next_piece = self.upcoming[queue_item_index];
 
-        self.upcoming[queue_item_index] = self.bag.next().unwrap(); // Safe because [self.bag.next] will never return None
+        self.upcoming[queue_item_index] = self
+            .bag
+            .next()
+            .expect("Should be safe because [self.bag.next] will never return [None]");
         self.queue_item_index = (self.queue_item_index + 1) % (SIZE as u8);
 
         Some(next_piece)

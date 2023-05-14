@@ -69,40 +69,39 @@ impl<'a> Drawable<'a> for Matrix {
 
         const TOP_RIGHT_CELL_POSITION: Vector2 = Vector2 { x: 403.0, y: 21.0 };
 
-        let mut canvas = canvas;
+        let mut canvas = canvas.draw(&RectangleGraphic {
+            rectangle: Rectangle {
+                size: Vector2 {
+                    x: CELL_SIZE * (PLAYFIELD_COLUMNS as f32),
+                    y: CELL_SIZE * (PLAYFIELD_ROWS as f32),
+                },
+            },
+            position: TOP_RIGHT_CELL_POSITION,
+            color: Color::GRAY,
+        });
 
         for row in 0..PLAYFIELD_ROWS {
             for column in 0..PLAYFIELD_COLUMNS {
-                canvas = canvas.draw(&RectangleGraphic {
-                    rectangle: Rectangle {
-                        size: Vector2 {
-                            x: CELL_SIZE,
-                            y: CELL_SIZE,
+                if self.cells[row][column] == Cell::Filled {
+                    canvas = canvas.draw(&RectangleGraphic {
+                        rectangle: Rectangle {
+                            size: Vector2 {
+                                x: CELL_SIZE,
+                                y: CELL_SIZE,
+                            },
                         },
-                    },
-                    position: TOP_RIGHT_CELL_POSITION
-                        + Vector2 {
-                            x: CELL_SIZE * (column as f32),
-                            y: CELL_SIZE * ((PLAYFIELD_ROWS - row - 1) as f32),
-                        },
-                    color: if self.cells[row][column] == Cell::Filled {
-                        Color::MAROON
-                    } else {
-                        Color::GRAY
-                    },
-                });
+                        position: TOP_RIGHT_CELL_POSITION
+                            + Vector2 {
+                                x: CELL_SIZE * (column as f32),
+                                y: CELL_SIZE * ((PLAYFIELD_ROWS - row - 1) as f32),
+                            },
+                        color: Color::MAROON,
+                    });
+                }
             }
         }
 
         canvas
-
-        // canvas.draw(&RectangleGraphic {
-        //     rectangle: Rectangle {
-        //         size: Vector2 { x: 450.0, y: 900.0 },
-        //     },
-        //     position: Vector2 { x: 403.0, y: 21.0 },
-        //     color: Color::MAROON,
-        // })
     }
 }
 

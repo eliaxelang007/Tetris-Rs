@@ -18,15 +18,15 @@ impl Tetromino {
         self
     }
 
-    pub(super) fn shift(mut self, step: Step) -> Self {
-        self.center.column += step.x_axis_step().into();
+    pub(super) fn shift(mut self, step: Step, speed: f32, delta_time: Duration) -> Self {
+        self.center.column += speed * (step.x_axis_step() as f32) * delta_time.as_secs_f32();
         self
     }
 
     pub(super) fn snap_to_grid(&self) -> [Snapped; 4] {
         self.minoes.clone().map(|mino| Snapped {
             row: (self.center.row + f32::from(mino.y_to_center)).floor() as i8,
-            column: (f32::from(self.center.column.clone()) + f32::from(mino.x_to_center)).floor() as i8,
+            column: (self.center.column + f32::from(mino.x_to_center)).floor() as i8,
         })
     }
 }
@@ -180,15 +180,12 @@ pub(super) struct Snapped {
 #[derive(Debug, Clone)]
 struct Center {
     row: f32,
-    column: HalfStep,
+    column: f32,
 }
 
 impl Center {
     fn new(row: f32, column: f32) -> Self {
-        Center {
-            row,
-            column: column.into(),
-        }
+        Center { row, column }
     }
 }
 

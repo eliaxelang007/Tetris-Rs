@@ -40,7 +40,9 @@ impl Game {
         };
 
         while !self.raylib.window.should_close() {
-            let action = player.next();
+            let action = player
+                .next()
+                .expect("Should be safe because [player.next] will never return [None]");
             self.tetris = self.tetris.update(self.raylib.window.frame_time(), action);
 
             self.raylib
