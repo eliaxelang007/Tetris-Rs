@@ -45,13 +45,7 @@ impl Game {
                 .expect("Should be safe because [player.next] will never return [None]");
             self.tetris = self.tetris.update(self.raylib.window.frame_time(), action);
 
-            self.raylib
-                .window
-                .canvas()
-                .draw(&Background {
-                    color: Color::RAY_WHITE,
-                })
-                .draw(&self.tetris);
+            self.raylib.window.canvas().draw(&self.tetris);
         }
     }
 }
