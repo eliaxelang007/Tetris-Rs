@@ -6,7 +6,7 @@ mod tetris;
 mod tetromino;
 
 use raylib::{
-    drawing::{Background, Color},
+    drawing::{Background, Color, FPSGraphic},
     window::Window,
     Raylib, RaylibBuilder,
 };
@@ -14,7 +14,7 @@ use raylib::{
 use player::{Human, Player};
 use tetris::Tetris;
 
-use self::player::TetrisMove;
+use self::{player::TetrisMove, raylib::shapes::Vector2};
 
 pub struct Game {
     raylib: Raylib,
@@ -45,7 +45,16 @@ impl Game {
                 .expect("Should be safe because [player.next] will never return [None]");
             self.tetris = self.tetris.update(self.raylib.window.frame_time(), action);
 
-            self.raylib.window.canvas().draw(&self.tetris);
+            self.raylib
+                .window
+                .canvas()
+                .draw(&Background {
+                    color: Color::RAY_WHITE,
+                })
+                .draw(&FPSGraphic {
+                    position: Vector2 { x: 10.0, y: 10.0 },
+                })
+                .draw(&self.tetris);
         }
     }
 }

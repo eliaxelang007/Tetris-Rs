@@ -6,7 +6,7 @@ use super::raylib::{
 use super::matrix::{Matrix, TetrominoValidity, PLAYFIELD_COLUMNS, PLAYFIELD_ROWS};
 use super::next_queue::NextQueue;
 use super::player::{Moves, Player, TetrisMove};
-use super::tetromino::{Tetromino, TetrominoType};
+use super::tetromino::{Tetromino, TetrominoKind};
 
 use std::time::Duration;
 

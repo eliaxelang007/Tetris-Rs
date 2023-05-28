@@ -4,7 +4,7 @@ use std::{ops::AddAssign, time::Duration};
 pub(super) struct Tetromino {
     center: Center,
     minoes: [Mino; 4],
-    kind: TetrominoType,
+    kind: TetrominoKind,
 }
 
 impl Tetromino {
@@ -82,7 +82,7 @@ impl Mino {
 use strum::{EnumCount, EnumIter};
 
 #[derive(EnumCount, EnumIter, Debug, Clone, Copy, Eq, Hash, PartialEq)]
-pub(super) enum TetrominoType {
+pub(super) enum TetrominoKind {
     O,
     I,
     T,
@@ -92,9 +92,9 @@ pub(super) enum TetrominoType {
     Z,
 }
 
-impl TetrominoType {
+impl TetrominoKind {
     pub(super) fn new(&self) -> Tetromino {
-        use TetrominoType::*;
+        use TetrominoKind::*;
 
         match self {
             O => Tetromino {

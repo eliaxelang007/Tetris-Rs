@@ -2,14 +2,14 @@ use super::raylib::{
     drawing::{Canvas, Color, Drawable, RectangleGraphic},
     shapes::{Rectangle, Vector2},
 };
-use super::tetromino::TetrominoType;
+use super::tetromino::TetrominoKind;
 
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
 use strum::{EnumCount, IntoEnumIterator};
 
 #[derive(Clone)]
 struct Bag {
-    tetrominoes: [TetrominoType; TetrominoType::COUNT],
+    tetrominoes: [TetrominoKind; TetrominoKind::COUNT],
     bag_item_index: u8,
     randomizer: ThreadRng,
 }
@@ -20,10 +20,10 @@ impl Bag {
 
         Bag {
             tetrominoes: {
-                let mut bag: [TetrominoType; TetrominoType::COUNT] = TetrominoType::iter()
-                    .collect::<Vec<TetrominoType>>()
+                let mut bag: [TetrominoKind; TetrominoKind::COUNT] = TetrominoKind::iter()
+                    .collect::<Vec<TetrominoKind>>()
                     .try_into()
-                    .expect("Should be safe because [TetrominoType::iter] will always have the length of [TetrominoType::COUNT]");
+                    .expect("Should be safe because [TetrominoKind::iter] will always have the length of [TetrominoKind::COUNT]");
 
                 bag.shuffle(&mut randomizer);
 
@@ -34,24 +34,24 @@ impl Bag {
         }
     }
 
-    fn current(&self) -> TetrominoType {
+    fn current(&self) -> TetrominoKind {
         self.tetrominoes[self.bag_item_index as usize]
     }
 }
 
 impl Iterator for Bag {
-    type Item = TetrominoType;
+    type Item = TetrominoKind;
 
     fn next(&mut self) -> Option<Self::Item> {
         let current_piece = self.current();
 
-        let tetromino_type_count = TetrominoType::COUNT as u8;
+        let tetromino_kind_count = TetrominoKind::COUNT as u8;
 
-        if self.bag_item_index == tetromino_type_count - 1 {
+        if self.bag_item_index == tetromino_kind_count - 1 {
             self.tetrominoes.shuffle(&mut self.randomizer);
         }
 
-        self.bag_item_index = (self.bag_item_index + 1) % tetromino_type_count;
+        self.bag_item_index = (self.bag_item_index + 1) % tetromino_kind_count;
 
         Some(current_piece)
     }
@@ -59,7 +59,7 @@ impl Iterator for Bag {
 
 pub(super) struct NextQueue<const SIZE: usize> {
     bag: Bag,
-    upcoming: [TetrominoType; SIZE],
+    upcoming: [TetrominoKind; SIZE],
     queue_item_index: u8,
 }
 
@@ -71,7 +71,7 @@ impl<const SIZE: usize> NextQueue<SIZE> {
             upcoming: bag
                 .clone()
                 .take(SIZE)
-                .collect::<Vec<TetrominoType>>()
+                .collect::<Vec<TetrominoKind>>()
                 .try_into()
                 .expect("Should be safe because [Bag::next] will never return [None]"),
             bag: bag,
@@ -79,7 +79,7 @@ impl<const SIZE: usize> NextQueue<SIZE> {
         }
     }
 
-    pub(super) fn upcoming(&self) -> impl Iterator<Item = &TetrominoType> {
+    pub(super) fn upcoming(&self) -> impl Iterator<Item = &TetrominoKind> {
         self.upcoming
             .iter()
             .cycle()
@@ -89,7 +89,7 @@ impl<const SIZE: usize> NextQueue<SIZE> {
 }
 
 impl<const SIZE: usize> Iterator for NextQueue<SIZE> {
-    type Item = TetrominoType;
+    type Item = TetrominoKind;
 
     fn next(&mut self) -> Option<Self::Item> {
         let queue_item_index = self.queue_item_index as usize;
@@ -120,6 +120,6 @@ impl<'a, const SIZE: usize> Drawable<'a> for NextQueue<SIZE> {
 
 // impl<const SIZE: usize> Display for NextQueue<SIZE> {
 //     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-//         write!(f, "{:?}", self.upcoming().collect::<Vec<&TetrominoType>>())
+//         write!(f, "{:?}", self.upcoming().collect::<Vec<&TetrominoKind>>())
 //     }
 // }
