@@ -1,12 +1,12 @@
+mod engine;
 mod matrix;
 mod next_queue;
 mod player;
-mod raylib;
 mod tetris;
 mod tetromino;
 
-use raylib::{
-    drawing::{Background, Color, FPSGraphic},
+use engine::{
+    vectors::{Background, Color, FPSGraphic},
     window::Window,
     Raylib, RaylibBuilder,
 };
@@ -14,7 +14,7 @@ use raylib::{
 use player::{Human, Player};
 use tetris::Tetris;
 
-use self::{player::TetrisMove, raylib::shapes::Vector2};
+use self::{engine::shapes::Vector2, player::TetrisMove};
 
 pub struct Game {
     raylib: Raylib,

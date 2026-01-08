@@ -47,24 +47,27 @@ impl Matrix {
     }
 
     pub(super) fn validate(&self, tetromino: &Tetromino) -> TetrominoValidity {
-        match tetromino.snap_to_grid().iter().all(|Snapped { row, column }| {
-            (0..(PLAYFIELD_ROWS as i8)).contains(&row)
-                && (0..(PLAYFIELD_COLUMNS as i8)).contains(&column)
-                && self.cells[*row as usize][*column as usize] != Cell::Filled
-        }) {
+        match tetromino
+            .snap_to_grid()
+            .iter()
+            .all(|Snapped { row, column }| {
+                (0..(PLAYFIELD_ROWS as i8)).contains(&row)
+                    && (0..(PLAYFIELD_COLUMNS as i8)).contains(&column)
+                    && self.cells[*row as usize][*column as usize] != Cell::Filled
+            }) {
             true => TetrominoValidity::Valid,
             false => TetrominoValidity::Invalid,
         }
     }
 }
 
-use super::raylib::{
-    drawing::{Canvas, Color, Drawable, RectangleGraphic},
+use super::engine::{
     shapes::{Rectangle, Vector2},
+    vectors::{Canvas, Color, Drawable, RectangleGraphic},
 };
 
 impl<'a> Drawable<'a> for Matrix {
-    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+    fn draw(&self, canvas: Canvas) -> Canvas {
         const CELL_SIZE: f32 = 45.0;
 
         const TOP_RIGHT_CELL_POSITION: Vector2 = Vector2 { x: 403.0, y: 21.0 };

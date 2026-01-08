@@ -6,7 +6,6 @@
         "msaa",
         "PLAYFIELD",
         "randomizer",
-        "Raylib",
         "rngs",
         "signum",
         "tetris",

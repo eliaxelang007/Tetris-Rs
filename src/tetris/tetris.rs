@@ -1,6 +1,6 @@
-use super::raylib::{
-    drawing::{Background, Canvas, Color, Drawable, RectangleGraphic},
+use super::engine::{
     shapes::{Rectangle, Vector2},
+    vectors::{Background, Canvas, Color, Drawable, RectangleGraphic},
 };
 
 use super::matrix::{Matrix, TetrominoValidity, PLAYFIELD_COLUMNS, PLAYFIELD_ROWS};
@@ -43,7 +43,8 @@ impl Tetris {
                 }
 
                 TetrisMove::Shift(step) => {
-                    self.falling_tetromino = self.falling_tetromino.shift(step, shift_speed, delta_time);
+                    self.falling_tetromino =
+                        self.falling_tetromino.shift(step, shift_speed, delta_time);
                 }
 
                 TetrisMove::SoftDrop => {
@@ -72,7 +73,7 @@ impl Tetris {
 }
 
 impl<'a> Drawable<'a> for Tetris {
-    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+    fn draw(&self, canvas: Canvas) -> Canvas {
         let matrix = self.matrix.clone().solidify(&self.falling_tetromino);
         canvas.draw(&matrix).draw(&self.next_queue)
     }

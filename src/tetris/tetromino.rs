@@ -31,9 +31,9 @@ impl Tetromino {
     }
 }
 
-use super::raylib::{
-    drawing::{Canvas, Color, Drawable, RectangleGraphic},
+use super::engine::{
     shapes::{Rectangle, Vector2},
+    vectors::{Canvas, Color, Drawable, RectangleGraphic},
 };
 
 struct TetrominoGraphic<'a> {
@@ -41,7 +41,7 @@ struct TetrominoGraphic<'a> {
 }
 
 impl<'a, 'b> Drawable<'a> for TetrominoGraphic<'b> {
-    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+    fn draw(&self, canvas: Canvas) -> Canvas {
         todo!()
     }
 }

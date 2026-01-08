@@ -1,6 +1,6 @@
 use std::process::exit;
 
-use super::raylib::input::{Input, KeyboardKey};
+use super::engine::input::{Input, KeyboardKey};
 use super::tetromino::{Rotation, Step};
 
 #[derive(Clone)]
@@ -32,7 +32,8 @@ impl Iterator for Human<'_> {
         use TetrisMove::*;
 
         let key_down: Box<dyn Fn(KeyboardKey) -> bool> = Box::new(|key| self.input.key_down(key));
-        let key_pressed: Box<dyn Fn(KeyboardKey) -> bool> = Box::new(|key| self.input.key_pressed(key));
+        let key_pressed: Box<dyn Fn(KeyboardKey) -> bool> =
+            Box::new(|key| self.input.key_pressed(key));
 
         Some(
             [
@@ -44,7 +45,13 @@ impl Iterator for Human<'_> {
                 (&key_pressed, KEY_SPACE, HardDrop),
             ]
             .iter()
-            .filter_map(|(reader, key, action)| if reader(*key) { Some(action.clone()) } else { None })
+            .filter_map(|(reader, key, action)| {
+                if reader(*key) {
+                    Some(action.clone())
+                } else {
+                    None
+                }
+            })
             .collect(),
         )
     }

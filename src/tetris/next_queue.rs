@@ -1,6 +1,6 @@
-use super::raylib::{
-    drawing::{Canvas, Color, Drawable, RectangleGraphic},
+use super::engine::{
     shapes::{Rectangle, Vector2},
+    vectors::{Canvas, Color, Drawable, RectangleGraphic},
 };
 use super::tetromino::TetrominoKind;
 
@@ -107,7 +107,7 @@ impl<const SIZE: usize> Iterator for NextQueue<SIZE> {
 }
 
 impl<'a, const SIZE: usize> Drawable<'a> for NextQueue<SIZE> {
-    fn draw(&self, canvas: Canvas<'a>) -> Canvas<'a> {
+    fn draw(&self, canvas: Canvas) -> Canvas {
         canvas.draw(&RectangleGraphic {
             rectangle: Rectangle {
                 size: Vector2 { x: 232.0, y: 712.0 },
